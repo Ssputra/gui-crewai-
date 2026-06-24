@@ -1,51 +1,37 @@
 # pyrefly: ignore [missing-import]
 import streamlit as st
 import time
+import io
+from contextlib import redirect_stdout
+from crew_logic import execute_crew
 
 # ==========================================
-# Simulasi Eksekusi CrewAI (Placeholder)
+# Eksekusi CrewAI (Asli dengan 9Router)
 # ==========================================
 def run_crewai_task(api_key: str, topic: str, description: str):
     """
-    Fungsi ini adalah placeholder untuk logika utama CrewAI Anda.
-    Di aplikasi aslinya, Anda akan mengimpor Crew, Agents, dan Tasks dari script CrewAI Anda,
-    lalu menjalankannya (misal: crew.kickoff()).
+    Fungsi untuk menjalankan logika CrewAI dan menangkap log verbose.
     """
-    logs = []
+    log_capture = io.StringIO()
+    status = "SUCCESS"
     
-    # Simulasi proses log (verbose)
-    logs.append("[INFO] Memulai inisialisasi CrewAI...")
-    time.sleep(1)
-    logs.append(f"[INFO] API Key terdeteksi. Otentikasi sukses.")
-    logs.append(f"[INFO] Agen 1 (Researcher) ditugaskan untuk topik: '{topic}'.")
-    time.sleep(2)
-    logs.append("[INFO] Agen 1 mengumpulkan data dan referensi...")
-    time.sleep(1)
-    logs.append(f"[INFO] Agen 2 (Writer) mulai menyusun deskripsi: '{description}'")
-    time.sleep(2)
-    logs.append("[SUCCESS] Seluruh tugas CrewAI telah selesai dieksekusi.")
+    # Menangkap print out dari CrewAI ke dalam string
+    with redirect_stdout(log_capture):
+        try:
+            print(f"[INFO] Memulai eksekusi CrewAI untuk topik: '{topic}'")
+            final_output = execute_crew(api_key, topic, description)
+            print("[SUCCESS] Seluruh tugas CrewAI telah selesai dieksekusi.")
+        except Exception as e:
+            print(f"[ERROR] Terjadi kesalahan: {str(e)}")
+            final_output = f"### Terjadi Kesalahan\n\n```\n{str(e)}\n```"
+            status = "ERROR"
+            
+    # Ambil log yang ditangkap, pecah jadi list berdasarkan baris baru
+    logs = log_capture.getvalue().split('\n')
+    # Filter baris kosong agar UI lebih rapi
+    logs = [log for log in logs if log.strip() != '']
     
-    # Simulasi hasil akhir Markdown
-    final_output = f"""# Laporan Analisis CrewAI
-
-## 📌 Topik Utama: {topic}
-
-Berdasarkan deskripsi yang Anda berikan (*"{description}"*), agen-agen kami telah merangkum poin-poin berikut:
-
-### 1. Riset Mendalam
-Tim agen peneliti telah mengumpulkan berbagai data terbaru terkait topik ini. Proses dilakukan secara komprehensif dari berbagai sumber tepercaya.
-
-### 2. Analisis Konten
-- **Kelebihan**: Pendekatan yang efisien dan menghemat waktu.
-- **Kekurangan**: Membutuhkan spesifikasi prompt yang detail untuk hasil maksimal.
-
-### 3. Kesimpulan
-Proses berhasil dijalankan dan output berhasil digenerate menggunakan format Markdown yang rapi. Anda bisa menggunakan hasil ini untuk keperluan lebih lanjut atau diunduh sebagai file `.md`.
-
----
-*Dihasilkan secara otomatis oleh sistem CrewAI.*
-"""
-    return logs, final_output
+    return logs, final_output, status
 
 # ==========================================
 # Pengaturan Utama Halaman Streamlit
@@ -127,11 +113,14 @@ def main():
             st.warning("⚠️ Mohon lengkapi Topik Utama dan Deskripsi Detail.")
         else:
             # Tampilkan spinner interaktif selama proses berlangsung
-            with st.spinner("⏳ Agen CrewAI sedang bekerja mengumpulkan data dan menyusun laporan. Mohon tunggu..."):
-                # Memanggil fungsi CrewAI (pada script Anda yang asli, panggil crew.kickoff() di sini)
-                logs, final_result = run_crewai_task(api_key, param_topic, param_desc)
+            with st.spinner("⏳ Agen CrewAI sedang bekerja mengumpulkan data dan menyusun laporan. Mohon tunggu (proses ini bisa memakan waktu beberapa menit)..."):
+                # Memanggil fungsi CrewAI asli
+                logs, final_result, status = run_crewai_task(api_key, param_topic, param_desc)
                 
-            st.success("✅ Eksekusi CrewAI berhasil diselesaikan!")
+            if status == "SUCCESS":
+                st.success("✅ Eksekusi CrewAI berhasil diselesaikan!")
+            else:
+                st.error("❌ Eksekusi CrewAI gagal.")
             
             # Tampilkan log proses di balik layar (Verbose) dalam expander opsional
             with st.expander("🔍 Lihat Log Proses 'Di Balik Layar' (Verbose Logs)"):
