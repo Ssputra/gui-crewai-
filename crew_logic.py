@@ -1,16 +1,17 @@
 import os
-from crewai import Agent, Task, Crew, Process
+from crewai import Agent, Task, Crew, Process, LLM
 
 def execute_crew(api_key: str, topic: str, description: str) -> str:
     """
     Fungsi utama untuk mengonfigurasi dan menjalankan CrewAI.
     """
-    # 1. Setup Environment Variables untuk 9Router
-    # CrewAI (lewat LiteLLM) akan otomatis membaca konfigurasi ini
-    os.environ["OPENAI_API_BASE"] = "http://ashenra.cloud/v1"
-    os.environ["OPENAI_API_KEY"] = api_key or "dummy-key"
-    
-    model_name = "openai/gpt-3.5-turbo"
+    # 1. Setup LLM menggunakan kelas LLM bawaan CrewAI
+    # Ini memastikan base_url tidak nyasar ke server OpenAI asli
+    router_llm = LLM(
+        model="openai/gpt-3.5-turbo",
+        base_url="http://ashenra.cloud/v1",
+        api_key=api_key or "dummy-key"
+    )
 
     # 2. Definisikan Agents
     researcher = Agent(
@@ -19,7 +20,7 @@ def execute_crew(api_key: str, topic: str, description: str) -> str:
         backstory='Anda adalah analis riset senior di sebuah lembaga riset terkemuka. Keahlian Anda adalah mengidentifikasi tren terbaru dan menganalisis data kompleks.',
         verbose=True,
         allow_delegation=False,
-        llm=model_name
+        llm=router_llm
     )
 
     writer = Agent(
@@ -28,7 +29,7 @@ def execute_crew(api_key: str, topic: str, description: str) -> str:
         backstory='Anda adalah Content Strategist yang ahli dalam mengubah riset yang kompleks menjadi artikel atau laporan yang menarik dan profesional.',
         verbose=True,
         allow_delegation=False,
-        llm=model_name
+        llm=router_llm
     )
 
     # 3. Definisikan Tasks
