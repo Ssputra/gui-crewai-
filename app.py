@@ -148,7 +148,7 @@ def main():
             st.download_button(
                 label="📥 Unduh Hasil Akhir (.md)",
                 data=final_result,
-                file_name=f"crewai_result_{topic.replace(' ', '_').lower()}.md",
+                file_name=f"crewai_result_{param_topic.replace(' ', '_').lower()}.md",
                 mime="text/markdown",
                 use_container_width=True
             )
