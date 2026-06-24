@@ -8,7 +8,7 @@ from crew_logic import execute_crew
 # ==========================================
 # Eksekusi CrewAI (Asli dengan 9Router)
 # ==========================================
-def run_crewai_task(api_key: str, topic: str, description: str):
+def run_crewai_task(api_key: str, model_name: str, topic: str, description: str):
     """
     Fungsi untuk menjalankan logika CrewAI dan menangkap log verbose.
     """
@@ -18,8 +18,8 @@ def run_crewai_task(api_key: str, topic: str, description: str):
     # Menangkap print out dari CrewAI ke dalam string
     with redirect_stdout(log_capture):
         try:
-            print(f"[INFO] Memulai eksekusi CrewAI untuk topik: '{topic}'")
-            final_output = execute_crew(api_key, topic, description)
+            print(f"[INFO] Memulai eksekusi CrewAI untuk topik: '{topic}' menggunakan model '{model_name}'")
+            final_output = execute_crew(api_key, model_name, topic, description)
             print("[SUCCESS] Seluruh tugas CrewAI telah selesai dieksekusi.")
         except Exception as e:
             print(f"[ERROR] Terjadi kesalahan: {str(e)}")
@@ -85,6 +85,13 @@ def main():
             help="Kunci API Anda aman dan tidak disimpan ke dalam database manapun."
         )
         
+        # Input Model Name
+        param_model = st.text_input(
+            "🧠 Model Name",
+            value="openai/gpt-3.5-turbo",
+            help="Masukkan nama model sesuai format 9Router, contoh: anthropic/claude-3-haiku, google/gemini-pro, dll."
+        )
+        
         st.markdown("---")
         st.subheader("📝 Parameter Tugas")
         
@@ -109,13 +116,15 @@ def main():
         # Validasi input sederhana sebelum menjalankan CrewAI
         if not api_key:
             st.warning("⚠️ Mohon masukkan API Key terlebih dahulu di menu sidebar.")
+        elif not param_model:
+            st.warning("⚠️ Mohon masukkan Model Name.")
         elif not param_topic or not param_desc:
             st.warning("⚠️ Mohon lengkapi Topik Utama dan Deskripsi Detail.")
         else:
             # Tampilkan spinner interaktif selama proses berlangsung
-            with st.spinner("⏳ Agen CrewAI sedang bekerja mengumpulkan data dan menyusun laporan. Mohon tunggu (proses ini bisa memakan waktu beberapa menit)..."):
+            with st.spinner(f"⏳ Agen CrewAI sedang bekerja menggunakan model {param_model}. Mohon tunggu (proses ini bisa memakan waktu beberapa menit)..."):
                 # Memanggil fungsi CrewAI asli
-                logs, final_result, status = run_crewai_task(api_key, param_topic, param_desc)
+                logs, final_result, status = run_crewai_task(api_key, param_model, param_topic, param_desc)
                 
             if status == "SUCCESS":
                 st.success("✅ Eksekusi CrewAI berhasil diselesaikan!")

@@ -1,14 +1,14 @@
 import os
 from crewai import Agent, Task, Crew, Process, LLM
 
-def execute_crew(api_key: str, topic: str, description: str) -> str:
+def execute_crew(api_key: str, model_name: str, topic: str, description: str) -> str:
     """
     Fungsi utama untuk mengonfigurasi dan menjalankan CrewAI.
     """
     # 1. Setup LLM menggunakan kelas LLM bawaan CrewAI
     # Ini memastikan base_url tidak nyasar ke server OpenAI asli
     router_llm = LLM(
-        model="openai/gpt-3.5-turbo",
+        model=model_name,
         base_url="http://ashenra.cloud/v1",
         api_key=api_key or "dummy-key"
     )
