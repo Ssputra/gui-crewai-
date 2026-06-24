@@ -6,14 +6,13 @@ def execute_crew(api_key: str, model_name: str, topic: str, description: str) ->
     Fungsi utama untuk mengonfigurasi dan menjalankan CrewAI.
     """
     # 1. Setup LLM menggunakan kelas LLM bawaan CrewAI
-    # Ini memastikan base_url tidak nyasar ke server OpenAI asli
-    # dan kita menggunakan custom_llm_provider="openai" agar nama model 
-    # dikirim apa adanya ke 9Router tanpa diotak-atik LiteLLM.
+    # Provider TIDAK lagi dipaksa menjadi 'openai'. Anda harus
+    # menuliskan provider secara manual di UI, misal: 'openai/mmf/mimo-auto'
+    # atau 'openrouter/anthropic/claude-3-haiku' dll.
     router_llm = LLM(
         model=model_name,
         base_url="http://ashenra.cloud/v1",
-        api_key=api_key or "dummy-key",
-        custom_llm_provider="openai"
+        api_key=api_key or "dummy-key"
     )
 
     # 2. Definisikan Agents
