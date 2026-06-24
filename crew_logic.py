@@ -1,27 +1,16 @@
 import os
 from crewai import Agent, Task, Crew, Process
-from langchain_openai import ChatOpenAI
-
-def get_9router_llm(api_key: str, model_name="openai/gpt-3.5-turbo"):
-    """
-    Mengonfigurasi LLM menggunakan 9Router.
-    Base URL diarahkan ke endpoint 9Router (default: http://localhost:20128/v1).
-    Jika 9Router Anda jalan di IP/Port lain, silakan ubah openai_api_base di bawah ini.
-    """
-    return ChatOpenAI(
-        openai_api_base="http://localhost:20128/v1",
-        openai_api_key=api_key or "dummy-key", # 9Router mungkin mengabaikan key jika sudah diset di dashboard
-        model_name=model_name,
-        temperature=0.7,
-        max_tokens=2000
-    )
 
 def execute_crew(api_key: str, topic: str, description: str) -> str:
     """
     Fungsi utama untuk mengonfigurasi dan menjalankan CrewAI.
     """
-    # 1. Setup LLM
-    llm = get_9router_llm(api_key=api_key)
+    # 1. Setup Environment Variables untuk 9Router
+    # CrewAI (lewat LiteLLM) akan otomatis membaca konfigurasi ini
+    os.environ["OPENAI_API_BASE"] = "http://ashenra.cloud/v1"
+    os.environ["OPENAI_API_KEY"] = api_key or "dummy-key"
+    
+    model_name = "openai/gpt-3.5-turbo"
 
     # 2. Definisikan Agents
     researcher = Agent(
@@ -30,7 +19,7 @@ def execute_crew(api_key: str, topic: str, description: str) -> str:
         backstory='Anda adalah analis riset senior di sebuah lembaga riset terkemuka. Keahlian Anda adalah mengidentifikasi tren terbaru dan menganalisis data kompleks.',
         verbose=True,
         allow_delegation=False,
-        llm=llm
+        llm=model_name
     )
 
     writer = Agent(
@@ -39,7 +28,7 @@ def execute_crew(api_key: str, topic: str, description: str) -> str:
         backstory='Anda adalah Content Strategist yang ahli dalam mengubah riset yang kompleks menjadi artikel atau laporan yang menarik dan profesional.',
         verbose=True,
         allow_delegation=False,
-        llm=llm
+        llm=model_name
     )
 
     # 3. Definisikan Tasks
