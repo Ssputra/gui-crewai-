@@ -23,7 +23,16 @@ cd gui-crewai-
 ```
 
 ### 3. Instalasi Dependencies
-Di dalam *folder* tersebut, jalankan perintah instalasi menggunakan pip:
+Sangat disarankan untuk menggunakan **Virtual Environment (venv)** agar tidak terjadi bentrok dengan paket sistem (terutama di Linux/VPS seperti Ubuntu/Debian).
+
+Buat dan aktifkan *virtual environment*:
+```bash
+python3 -m venv venv
+source venv/bin/activate  # Untuk Linux/Mac
+# venv\Scripts\activate   # Untuk Windows
+```
+
+Setelah `venv` aktif (ditandai dengan tulisan `(venv)` di terminal), jalankan perintah instalasi menggunakan pip:
 ```bash
 pip install -r requirements.txt
 ```
